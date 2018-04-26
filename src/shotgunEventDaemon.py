@@ -130,7 +130,11 @@ def _addMailHandlerToLogger(logger, smtpServer, fromAddr, toAddrs, emailSubject,
 class Config(SafeConfigParser):
     def __init__(self, path):
         SafeConfigParser.__init__(self, os.environ)
+        # self.optionxform = str
         self.read(path)
+
+    def optionxform(self, optionstr):
+        return optionstr
 
     def getShotgunURL(self):
         return self.get('shotgun', 'server')
