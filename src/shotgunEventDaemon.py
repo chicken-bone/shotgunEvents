@@ -128,9 +128,10 @@ def _addMailHandlerToLogger(logger, smtpServer, fromAddr, toAddrs, emailSubject,
         logger.addHandler(mailHandler)
 
 
-class Config(SafeConfigParser(os.environ)):
+class Config(SafeConfigParser):
     def __init__(self, path):
         SafeConfigParser.__init__(self)
+        self = self(os.environ)
         self.read(path)
 
     def getShotgunURL(self):
@@ -148,7 +149,7 @@ class Config(SafeConfigParser(os.environ)):
             if not proxy_server:
                 return None
             return proxy_server
-        except ConfigParser.NoOptionError:
+        except SafeConfigParser.NoOptionError:
             return None
 
     def getEventIdFile(self):
