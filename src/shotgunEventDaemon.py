@@ -131,7 +131,6 @@ def _addMailHandlerToLogger(logger, smtpServer, fromAddr, toAddrs, emailSubject,
 class Config(SafeConfigParser):
     def __init__(self, path):
         SafeConfigParser.__init__(self)
-        self = self(os.environ)
         self.read(path)
 
     def getShotgunURL(self):
