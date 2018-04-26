@@ -26,7 +26,7 @@ http://shotgunsoftware.github.com/shotgunEvents
 __version__ = '0.9'
 __version_info__ = (0, 9)
 
-import ConfigParser
+from ConfigParser import SafeConfigParser
 import datetime
 import imp
 import logging
@@ -128,9 +128,9 @@ def _addMailHandlerToLogger(logger, smtpServer, fromAddr, toAddrs, emailSubject,
         logger.addHandler(mailHandler)
 
 
-class Config(ConfigParser.ConfigParser):
+class Config(SafeConfigParser(os.environ)):
     def __init__(self, path):
-        ConfigParser.ConfigParser.__init__(self)
+        SafeConfigParser.__init__(self)
         self.read(path)
 
     def getShotgunURL(self):
