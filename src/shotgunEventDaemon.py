@@ -130,9 +130,10 @@ def _addMailHandlerToLogger(logger, smtpServer, fromAddr, toAddrs, emailSubject,
 class Config(SafeConfigParser):
     def __init__(self, path):
         SafeConfigParser.__init__(self, os.environ)
-        # self.optionxform = str
         self.read(path)
+        print self.get('shotgun', 'server')
 
+    # keeps options case sensative
     def optionxform(self, optionstr):
         return optionstr
 

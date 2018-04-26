@@ -28,11 +28,14 @@ def slackAlert(sg, logger, event, args):
     sc = SlackClient(slack_token)
 
     if event["user"]["type"] == "HumanUser":
-        slack_user = getSlackUser(sg, sc, logger, event["user"]["id"])
+        slack_id = getSlackUserId(sg, sc, logger, event["user"]["id"])
+        if slack_id:
+            user = "<@%s>" % slack_id
+        else:
+            user = event["user"]["name"]
         data = {
             'project': event["project"]["name"],
-            'user_name': slack_user["username"],
-            'slack_id': slack_user["id"],
+            'user': user,
             'entity_type': event["entity"]["type"],
             'entity_id': event["entity"]["id"],
             'entity_name': event["entity"]["name"],
@@ -43,26 +46,31 @@ def slackAlert(sg, logger, event, args):
             "chat.postMessage",
             channel="U1FU62WKS",
             as_user=True,
-            text="Project: {project}\nDescription: <@{slack_id}> set <https://cbfx.shotgunstudio.com/detail/{entity_type}/{entity_id}|{entity_name}> to {new_value}.".format(**data)
+            text="Project: {project}\nDescription: {user} set <https://cbfx.shotgunstudio.com/detail/{entity_type}/{entity_id}|{entity_name}> to {new_value}.".format(**data)
         )
 
 
-def getSlackUser(sg, sc, logger, shotgun_id):
+def getSlackUserId(sg, sc, logger, shotgun_id):
 
-    sg_email = sg.find_one(
+    sg_user = sg.find_one(
         "HumanUser",
         [["id", "is", shotgun_id]],
-        ["email"]
-    )["email"]
-
-    # logger.info("email from shotgun: %s" % str(sg_email))
-
-    slack_user = sc.api_call(
-        "users.lookupByEmail",
-        email=sg_email
+        ["email", "sg_slack_id"]
     )
 
-    # logger.info("slack returned: %s" % str(slack_user))
+    if sg_user["sg_slack_id"]:
+        return sg_user["sg_slack_id"]
+    else:
+        slack_user = sc.api_call(
+            "users.lookupByEmail",
+            email=sg_user["email"]
+        )
 
-    if slack_user["ok"]:
-        return {"id": slack_user["user"]["id"], "username": slack_user["user"]["name"]}
+        # logger.debug("slack returned: %s" % str(slack_user))
+
+        if slack_user["ok"]:
+            slack_id = slack_user["user"]["id"]
+            sg.update("HumanUser", shotgun_id, {"sg_slack_id": slack_id})
+            return slack_id
+        else:
+            return None
