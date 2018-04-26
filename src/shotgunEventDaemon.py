@@ -37,6 +37,8 @@ import socket
 import sys
 import time
 import traceback
+import daemonizer
+import shotgun_api3 as sg
 
 from distutils.version import StrictVersion
 
@@ -50,9 +52,6 @@ if sys.platform == 'win32':
     import win32service
     import win32event
     import servicemanager
-
-import daemonizer
-import shotgun_api3 as sg
 
 
 CURRENT_PYTHON_VERSION = StrictVersion(sys.version.split()[0])
@@ -130,7 +129,7 @@ def _addMailHandlerToLogger(logger, smtpServer, fromAddr, toAddrs, emailSubject,
 
 class Config(SafeConfigParser):
     def __init__(self, path):
-        SafeConfigParser.__init__(self)
+        SafeConfigParser.__init__(self, os.environ)
         self.read(path)
 
     def getShotgunURL(self):
