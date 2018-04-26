@@ -5,7 +5,7 @@
 # chkconfig: 345 99 00
 # description: Shotgun event daemon
 #
-### BEGIN INIT INFO
+# BEGIN INIT INFO
 # Provides: shotgunEvent
 # Required-Start: $network
 # Should-Start: $remote_fs
@@ -14,7 +14,7 @@
 # Default-Start: 2 3 4 5
 # Short-Description: Shotgun event daemon
 # Description: Shotgun event daemon
-### END INIT INFO
+# END INIT INFO
 
 """
 For an overview of shotgunEvents, please see raw documentation in the docs
@@ -363,7 +363,7 @@ class Engine(object):
                     # in the id file. First we'll search to see the latest id a
                     # matching plugin name has elsewhere in the id file. We do
                     # this as a fallback in case the plugins directory has been
-                    # moved. If there's no match, use the latest event id 
+                    # moved. If there's no match, use the latest event id
                     # in Shotgun.
                     if noStateCollections:
                         maxPluginStates = {}
@@ -417,7 +417,7 @@ class Engine(object):
         conn_attempts = 0
         lastEventId = None
         while lastEventId is None:
-            order = [{'column':'id', 'direction':'desc'}]
+            order = [{'column': 'id', 'direction': 'desc'}]
             try:
                 result = self._sg.find_one("EventLogEntry", filters=[], fields=['id'], order=order)
             except (sg.ProtocolError, sg.ResponseError, socket.error), err:
@@ -470,7 +470,7 @@ class Engine(object):
             # Reload plugins
             for collection in self._pluginCollections:
                 collection.load()
-                
+
             # Make sure that newly loaded events have proper state.
             self._loadEventIdData()
 
@@ -494,8 +494,8 @@ class Engine(object):
         if nextEventId is not None:
             filters = [['id', 'greater_than', nextEventId - 1]]
             fields = ['id', 'event_type', 'attribute_name', 'meta', 'entity', 'user', 'project', 'session_uuid', 'created_at']
-            order = [{'column':'id', 'direction':'asc'}]
-    
+            order = [{'column': 'id', 'direction': 'asc'}]
+
             conn_attempts = 0
             while True:
                 try:
@@ -551,6 +551,7 @@ class PluginCollection(object):
     """
     A group of plugin files in a location on the disk.
     """
+
     def __init__(self, engine, path):
         if not os.path.isdir(path):
             raise ValueError('Invalid path: %s' % path)
@@ -630,6 +631,7 @@ class Plugin(object):
     The plugin class represents a file on disk which contains one or more
     callbacks.
     """
+
     def __init__(self, engine, path):
         """
         @param engine: The engine that instanciated this plugin.
@@ -764,7 +766,7 @@ class Plugin(object):
         Register a callback in the plugin.
         """
         global sg
-        sgConnection = sg.Shotgun(self._engine.config.getShotgunURL(), sgScriptName, sgScriptKey, 
+        sgConnection = sg.Shotgun(self._engine.config.getShotgunURL(), sgScriptName, sgScriptKey,
                                   http_proxy=self._engine.config.getEngineProxyServer())
         self._callbacks.append(Callback(callback, self, self._engine, sgConnection, matchEvents, args, stopOnError))
 
@@ -801,16 +803,16 @@ class Plugin(object):
         return self._active
 
     def _updateLastEventId(self, event):
-        BACKLOG_TIMEOUT = 5 # time in minutes after which we consider a pending event won't happen
+        BACKLOG_TIMEOUT = 5  # time in minutes after which we consider a pending event won't happen
         if self._lastEventId is not None and event["id"] > self._lastEventId + 1:
             event_date = event["created_at"].replace(tzinfo=None)
             if datetime.datetime.now() > (event_date + datetime.timedelta(minutes=BACKLOG_TIMEOUT)):
                 # the event we've just processed happened more than BACKLOG_TIMEOUT minutes ago so any event
                 # with a lower id should have shown up in the EventLog by now if it actually happened
-                if event["id"]==self._lastEventId+2:
-                    self.logger.info('Event %d never happened - ignoring.', self._lastEventId+1)
+                if event["id"] == self._lastEventId + 2:
+                    self.logger.info('Event %d never happened - ignoring.', self._lastEventId + 1)
                 else:
-                    self.logger.info('Events %d-%d never happened - ignoring.', self._lastEventId+1, event["id"]-1)
+                    self.logger.info('Events %d-%d never happened - ignoring.', self._lastEventId + 1, event["id"] - 1)
             else:
                 # in this case, we want to add the missing events to the backlog as they could show up in the
                 # EventLog within BACKLOG_TIMEOUT minutes, during which we'll keep asking for the same range
@@ -841,6 +843,7 @@ class Registrar(object):
     """
     See public API docs in docs folder.
     """
+
     def __init__(self, plugin):
         """
         Wrap a plugin so it can be passed to a user.
@@ -1045,10 +1048,10 @@ class CustomSMTPHandler(logging.handlers.SMTPHandler):
             smtp.connect(self.mailhost, port)
             msg = self.format(record)
             msg = "From: %s\r\nTo: %s\r\nSubject: %s\r\nDate: %s\r\n\r\n%s" % (
-                            self.fromaddr,
-                            ",".join(self.toaddrs),
-                            self.getSubject(record),
-                            formatdate(), msg)
+                self.fromaddr,
+                ",".join(self.toaddrs),
+                self.getSubject(record),
+                formatdate(), msg)
             if self.username:
                 if self.secure is not None:
                     smtp.ehlo()
@@ -1123,6 +1126,7 @@ class LinuxDaemon(daemonizer.Daemon):
     """
     Linux Daemon wrapper or wrapper used for foreground operation on Windows
     """
+
     def __init__(self):
         self._engine = Engine(_getConfigPath())
         super(LinuxDaemon, self).__init__('shotgunEvent', self._engine.config.getEnginePIDFile())
