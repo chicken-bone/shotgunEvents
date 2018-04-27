@@ -18,6 +18,7 @@ def registerCallbacks(reg):
     )
 
     reg.logger.setLevel(logging.DEBUG)
+    reg.logger.debug("Registered callback.")
 
 
 def slackAlert(sg, logger, event, args):

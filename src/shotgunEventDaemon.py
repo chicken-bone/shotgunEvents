@@ -27,6 +27,7 @@ __version__ = '0.9'
 __version_info__ = (0, 9)
 
 from ConfigParser import SafeConfigParser
+import StringIO
 import datetime
 import imp
 import logging
@@ -129,9 +130,12 @@ def _addMailHandlerToLogger(logger, smtpServer, fromAddr, toAddrs, emailSubject,
 
 class Config(SafeConfigParser):
     def __init__(self, path):
-        SafeConfigParser.__init__(self, os.environ)
-        self.read(path)
-        print self.get('shotgun', 'server')
+        with open(path, 'r') as cfg_file:
+            cfg_txt = os.path.expandvars(cfg_file.read())
+        SafeConfigParser.__init__(self)
+        self.readfp(StringIO.StringIO(cfg_txt))
+        # SafeConfigParser.__init__(self, os.environ)
+        # self.read(path)
 
     # keeps options case sensative
     def optionxform(self, optionstr):

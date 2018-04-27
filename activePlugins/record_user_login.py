@@ -29,6 +29,7 @@ def registerCallbacks(reg):
     # messages through (don't block info, etc). This is particularly usefull
     # for enabling and disabling debugging on a per plugin basis.
     reg.logger.setLevel(logging.DEBUG)
+    reg.logger.debug("Registered callback.")
 
 
 def record_login(sg, logger, event, args):
