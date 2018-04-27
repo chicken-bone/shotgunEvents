@@ -132,10 +132,10 @@ class Config(SafeConfigParser):
     def __init__(self, path):
         with open(path, 'r') as cfg_file:
             cfg_txt = os.path.expandvars(cfg_file.read())
-        SafeConfigParser.__init__(self)
-        self.readfp(StringIO.StringIO(cfg_txt))
-        # SafeConfigParser.__init__(self, os.environ)
-        # self.read(path)
+            SafeConfigParser.__init__(self)
+            self.readfp(StringIO.StringIO(cfg_txt))
+            # SafeConfigParser.__init__(self, os.environ)
+            # self.read(path)
 
     # keeps options case sensative
     def optionxform(self, optionstr):
