@@ -50,28 +50,29 @@ def slackAlert(sg, logger, event, args):
         if not managers:
             return
 
-        if event["user"]["type"] == "HumanUser":
-            slack_id = getSlackUserId(sg, sc, event["user"]["id"])
-            if slack_id:
-                user = "<@%s>" % slack_id
-            else:
-                user = event["user"]["name"]
-            data = {
-                'site': __SG_SITE,
-                'user': user,
-                'project': "<{}/page/project_overview?project_id={}|{}>".format(__SG_SITE, event["project"]["id"], event["project"]["name"]),
-                'version': "<{}/detail/Version/{}|{}>".format(__SG_SITE, event["entity"]["id"], event["entity"]["name"])
-            }
-
-            for manager in managers:
-                slack_id = getSlackUserId(sg, sc, manager["id"])
+        if not event["entity"] is None:
+            if event["user"]["type"] == "HumanUser":
+                slack_id = getSlackUserId(sg, sc, event["user"]["id"])
                 if slack_id:
-                    sc.api_call(
-                        "chat.postMessage",
-                        channel=slack_id,
-                        as_user=True,
-                        text="{user} has submitted version {version} on {project}".format(**data)
-                    )
+                    user = "<@%s>" % slack_id
+                else:
+                    user = event["user"]["name"]
+                data = {
+                    'site': __SG_SITE,
+                    'user': user,
+                    'project': "<{}/page/project_overview?project_id={}|{}>".format(__SG_SITE, event["project"]["id"], event["project"]["name"]),
+                    'version': "<{}/detail/Version/{}|{}>".format(__SG_SITE, event["entity"]["id"], event["entity"]["name"])
+                }
+
+                for manager in managers:
+                    slack_id = getSlackUserId(sg, sc, manager["id"])
+                    if slack_id:
+                        sc.api_call(
+                            "chat.postMessage",
+                            channel=slack_id,
+                            as_user=True,
+                            text="{user} has submitted version {version} on {project}".format(**data)
+                        )
 
     if event["event_type"] == "Shotgun_Task_Change" and event["attribute_name"] == "task_assignees":
 

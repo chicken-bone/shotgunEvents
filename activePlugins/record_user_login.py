@@ -42,7 +42,7 @@ def record_login(sg, logger, event, args):
     :param event: A Shotgun EventLogEntry entity dictionary.
     :param args: Any additional misc arguments passed through this plugin.
     """
-    logger.debug("%s" % str(event))
+    # logger.debug("%s" % str(event))
     user_name = event["entity"]["name"]
     user_id = event["entity"]["id"]
     login_time = event["created_at"]
