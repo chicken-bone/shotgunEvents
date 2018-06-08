@@ -67,8 +67,27 @@ def new_version_alert(sg, logger, event, args):
     :param args: Any additional misc arguments passed through this plugin.
     """
 
+    # query some project data
+    proj_data = sg.find_one(
+        "Project",
+        [["id", "is", event["project"]["id"]]],
+        ["id", "code", "sg_vfx_supervisor", "sg_cg_supervisors", "sg_producer", "sg_coordinator"]
+    )
+
     # get the project managers
-    managers = get_project_managers(sg, event["project"]["id"])
+    managers = []
+    if proj_data.get("sg_vfx_supervisor"):
+        for vfx_supe in proj_data.get("sg_vfx_supervisor"):
+            managers.append(vfx_supe)
+    if proj_data.get("sg_cg_supervisor"):
+        for cg_supe in proj_data.get("sg_cg_supervisor"):
+            managers.append(cg_supe)
+    if proj_data.get("sg_producer"):
+        for producer in proj_data.get("sg_producer"):
+            managers.append(producer)
+    if proj_data.get("sg_coordinator"):
+        for coord in proj_data.get("sg_coordinator"):
+            managers.append(coord)
 
     # if theres no one to notify, then bail
     if not managers:
@@ -87,36 +106,16 @@ def new_version_alert(sg, logger, event, args):
         data = {
             'site': __SG_SITE,
             'user': user,
-            'project': "<{}/page/project_overview?project_id={}|{}>".format(__SG_SITE, event["project"]["id"], event["project"]["name"]),
+            'project': "<{}/page/project_overview?project_id={}|{}>".format(__SG_SITE, proj_data.get("id"), proj_data.get("code")),
             'version': "<{}/detail/Version/{}|{}>".format(__SG_SITE, event["entity"]["id"], event["entity"]["name"])
         }
 
         for manager in managers:
             slack_id = slack_shotgun_bot.get_slack_user_id(sg, manager["id"])
             if slack_id:
-                message = "{user} has submitted version {version} on {project}".format(**data)
+                message = "{user} has submitted version {project} / {version}".format(**data)
                 slack_message = slack_shotgun_bot.send_message(slack_id, message)
                 if slack_message["ok"]:
                     logger.info("New verison alert sent to {}.".format(manager["name"]))
                 elif slack_message["error"]:
                     logger.warning("New version alert to {} failed to send with error: {}".format(manager["name"], slack_message["error"]))
-
-
-def get_project_managers(sg, project_id):
-
-    proj_data = sg.find_one(
-        "Project",
-        [["id", "is", project_id]],
-        ["sg_vfx_supervisor", "sg_cg_supervisors", "sg_producer"]
-    )
-    managers = []
-    if proj_data.get("sg_vfx_supervisor"):
-        for vfx_supe in proj_data.get("sg_vfx_supervisor"):
-            managers.append(vfx_supe)
-    if proj_data.get("sg_cg_supervisor"):
-        for cg_supe in proj_data.get("sg_cg_supervisor"):
-            managers.append(cg_supe)
-    if proj_data.get("sg_producer"):
-        for producer in proj_data.get("sg_producer"):
-            managers.append(producer)
-    return managers

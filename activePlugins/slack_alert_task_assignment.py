@@ -75,6 +75,21 @@ def task_assignment_alert(sg, logger, event, args):
     if not event_project or not task_assignees:
         return
 
+    # query some project data
+    proj_data = sg.find_one(
+        "Project",
+        [["id", "is", event["project"]["id"]]],
+        ["code"]
+    )
+
+    task_data = sg.find_one(
+        "Task",
+        [["id", "is", event["entity"]["id"]]],
+        ["content", "entity"]
+    )
+
+    task_link = task_data.get("entity")
+
     users = []
     for task_assignee in task_assignees:
         if task_assignee["type"] == "HumanUser":
@@ -84,11 +99,12 @@ def task_assignment_alert(sg, logger, event, args):
         slack_id = slack_shotgun_bot.get_slack_user_id(sg, user["id"])
         if slack_id:
             data = {
-                'project': "<{}/page/project_overview?project_id={}|{}>".format(__SG_SITE, event["project"]["id"], event["project"]["name"]),
-                'task': "<{}/detail/Task/{}|{}>".format(__SG_SITE, event["entity"]["id"], event["entity"]["name"])
+                'project': "<{}/page/project_overview?project_id={}|{}>".format(__SG_SITE, proj_data.get("id"), proj_data.get("code")),
+                'task': "<{}/detail/Task/{}|{}>".format(__SG_SITE, task_data.get("id"), task_data.get("content")),
+                'task_link': "<{}/detail/{}/{}|{}>".format(__SG_SITE, task_link["type"], task_link["id"], task_link["name"])
             }
 
-            message = "You've been assigned {task} on {project}".format(**data)
+            message = "You've been assigned {project} / {task_link} / {task}".format(**data)
             slack_message = slack_shotgun_bot.send_message(slack_id, message)
             if slack_message["ok"]:
                 logger.info("New assignment alert sent to {}.".format(user["name"]))

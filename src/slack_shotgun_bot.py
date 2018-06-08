@@ -51,6 +51,18 @@ def kick_from_channel(user, channel):
     return kick
 
 
+def invite_new_user(email, channels=None):
+    """
+    Invites a new slack user to the workspace.
+
+    :param email: The email adddress to end the invite.
+    :param channel: A comma separated list of channel IDs for the new user.
+    """
+    # TODO: Test this. This is an undocumented slack method.
+    invite = sc_user.api_call("users.admin.invite", email=email, channels=channels)
+    return invite
+
+
 def get_slack_user_id(sg, shotgun_id):
     """
     Looks up the shotgun user in slack by matching email address
