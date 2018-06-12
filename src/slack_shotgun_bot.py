@@ -26,13 +26,17 @@ def create_channel(channel_name, private=False):
 
     :param channel_name: the slack channel name.
     """
+    channel_id = None
     if private:
         new_channel = sc_user.api_call("groups.create", name=channel_name)
-        channel_id = new_channel.get("group").get("id")
+        if new_channel:
+            channel_id = new_channel.get("group").get("id")
     else:
         new_channel = sc_user.api_call("channels.create", name=channel_name)
-        channel_id = new_channel.get("channel").get("id")
-    invite_to_channel(slack_bot_user_id, channel_id)
+        if new_channel:
+            channel_id = new_channel.get("channel").get("id")
+    if channel_id:
+        invite_to_channel(slack_bot_user_id, channel_id)
     return new_channel
 
 
