@@ -4,6 +4,7 @@ from slackclient import SlackClient
 
 slack_bot_token = os.environ["SLACK_BOT_TOKEN"]
 slack_user_token = os.environ["SLACK_USER_TOKEN"]
+slack_bot_user_id = os.environ["SLACK_BOT_USER_ID"]
 sc_bot = SlackClient(slack_bot_token)
 sc_user = SlackClient(slack_user_token)
 
@@ -19,13 +20,19 @@ def send_message(channel, message):
     return slack_message
 
 
-def create_channel(channel_name):
+def create_channel(channel_name, private=False):
     """
     Creates a new slack channel and returns the channel ID if successful.
 
     :param channel_name: the slack channel name.
     """
-    new_channel = sc_user.api_call("channels.create", name=channel_name)
+    if private:
+        new_channel = sc_user.api_call("groups.create", name=channel_name)
+        channel_id = new_channel.get("group").get("id")
+    else:
+        new_channel = sc_user.api_call("channels.create", name=channel_name)
+        channel_id = new_channel.get("channel").get("id")
+    invite_to_channel(slack_bot_user_id, channel_id)
     return new_channel
 
 
@@ -36,7 +43,10 @@ def invite_to_channel(user, channel):
     :param user: A slack user ID.
     :param channel: A slack channel ID.
     """
-    invite = sc_user.api_call("channels.invite", user=user, channel=channel)
+    if channel.startswith("G"):
+        invite = sc_user.api_call("groups.invite", user=user, channel=channel)
+    else:
+        invite = sc_user.api_call("channels.invite", user=user, channel=channel)
     return invite
 
 
@@ -47,7 +57,10 @@ def kick_from_channel(user, channel):
     :param user: A slack user ID.
     :param channel: A slack channel ID.
     """
-    kick = sc_user.api_call("channels.kick", name=user, channel=channel)
+    if channel.startswith("G"):
+        kick = sc_user.api_call("groups.kick", name=user, channel=channel)
+    else:
+        kick = sc_user.api_call("channel.kick", name=user, channel=channel)
     return kick
 
 

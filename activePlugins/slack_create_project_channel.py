@@ -87,21 +87,26 @@ def createChannel(sg, logger, event, args):
     proj_data = sg.find_one(
         "Project",
         [["id", "is", project_id]],
-        ["sg_vfx_supervisor", "sg_cg_supervisors", "sg_producer", "code"]
+        ["code"]
     )
 
     if not proj_data:
         logger.info("Project data returned None. Skipping.")
         return
 
-    channel_name = "proj-{0}".format(proj_data["code"])
+    channel_name = "proj-{}".format(proj_data["code"])
 
-    logger.debug("Asking slack to create the new channel {}".format(channel_name))
-    new_channel = slack_shotgun_bot.create_channel(channel_name)
+    logger.debug("Asking slack to create the new private channel {}".format(channel_name))
+    new_channel = slack_shotgun_bot.create_channel(channel_name, private=True)
 
     if new_channel["ok"]:
-        channel_id = new_channel["channel"]["id"]
-        logger.debug("New slack channel made with name #{} and id {}".format(new_channel["channel"]["name"], channel_id))
+        if new_channel.get("group").get("id"):
+            channel_id = new_channel.get("group").get("id")
+            channel_name = new_channel.get("group").get("name")
+        else:
+            channel_id = new_channel.get("channel").get("id")
+            channel_name = new_channel.get("channel").get("name")
+        logger.debug("New slack group made with name #{} and id {}".format(channel_name, channel_id))
         sg.update("Project", project_id, {"sg_slack_channel_id": channel_id})
     elif new_channel.get("error"):
         logger.warning("Slack channel was NOT created successfully with error: {}".format(new_channel["error"]))

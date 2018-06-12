@@ -37,7 +37,7 @@ def registerCallbacks(reg):
     # - Argument to pass through to the callable
     #
     # eventFilter = {'Shotgun_Task_Change': ['sg_status_list']}
-    eventFilter = {'Shotgun_Project_Change': "users"}
+    eventFilter = {"Shotgun_Shot_Change": "sg_status_list"}
     reg.registerCallback(
         os.environ["SGDAEMON_LOGARGS_NAME"],
         os.environ["SGDAEMON_LOGARGS_KEY"],

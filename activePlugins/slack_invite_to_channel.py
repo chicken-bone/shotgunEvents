@@ -26,13 +26,15 @@ def registerCallbacks(reg):
         reg.logger.warning("Plugin is not valid, will not register callback.")
         return
 
+    event_filter = {"Shotgun_Project_Change": ["users", "sg_vfx_supervisor", "sg_cg_supervisor", "sg_producer", "sg_coordinator"]}
+
     # Register our callback with the Shotgun_%s_Change event and tell the logger
     # about it.
     reg.registerCallback(
         script_name,
         script_key,
         createChannel,
-        {"Shotgun_Project_Change": "users"},
+        event_filter,
         None,
     )
     reg.logger.debug("Registered callback.")
