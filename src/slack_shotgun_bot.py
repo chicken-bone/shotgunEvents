@@ -68,7 +68,7 @@ def kick_from_channel(user, channel):
     return kick
 
 
-def invite_new_user(email, channels=None):
+def invite_to_workspace(email, channels=None):
     """
     Invites a new slack user to the workspace.
 
