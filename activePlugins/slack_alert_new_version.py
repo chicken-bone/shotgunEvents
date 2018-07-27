@@ -67,6 +67,10 @@ def new_version_alert(sg, logger, event, args):
     :param args: Any additional misc arguments passed through this plugin.
     """
 
+    # check to make sure the event has a project id. if not, bail
+    if not event["project"]["id"]:
+        return
+
     # query some project data
     proj_data = sg.find_one(
         "Project",
