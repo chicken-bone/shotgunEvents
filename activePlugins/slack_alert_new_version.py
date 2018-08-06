@@ -67,14 +67,23 @@ def new_version_alert(sg, logger, event, args):
     :param args: Any additional misc arguments passed through this plugin.
     """
 
-    # check to make sure the event has a project id. if not, bail
-    if not event["project"]["id"]:
+    # Make some vars for convenience.
+    event_project = event.get("project")
+
+    # Bail if we don't have the info we need.
+    if not event_project:
+        logger.warning(
+            "Version %s created without project, skipping: %s" % (
+                event["entity"]["name"],
+                event["entity"]["id"],
+            )
+        )
         return
 
     # query some project data
     proj_data = sg.find_one(
         "Project",
-        [["id", "is", event["project"]["id"]]],
+        [["id", "is", event_project["id"]]],
         ["id", "code", "sg_vfx_supervisor", "sg_cg_supervisors", "sg_producer", "sg_coordinator"]
     )
 
