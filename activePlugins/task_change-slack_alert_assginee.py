@@ -15,8 +15,8 @@ def registerCallbacks(reg):
     # Grab authentication env vars for this plugin. Install these into the env
     # if they don't already exist.
     server = os.environ["SG_SERVER"]
-    script_name = os.environ["SGDAEMON_SLACKALERTS_NAME"]
-    script_key = os.environ["SGDAEMON_SLACKALERTS_KEY"]
+    script_name = os.environ["SG_SCRIPT_NAME"]
+    script_key = os.environ["SG_SCRIPT_KEY"]
 
     # Grab an sg connection for the validator.
     sg = shotgun_api3.Shotgun(server, script_name=script_name, api_key=script_key)

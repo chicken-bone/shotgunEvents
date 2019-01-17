@@ -9,14 +9,14 @@ sc_bot = SlackClient(slack_bot_token)
 sc_user = SlackClient(slack_user_token)
 
 
-def send_message(channel, message):
+def send_message(channel, message, attachments=None):
     """
     Sends a message as the the bot user.
 
     :param channel: A slack channel ID or user ID.
     :param message: The slack message.
     """
-    slack_message = sc_bot.api_call("chat.postMessage", channel=channel, as_user=True, text=message)
+    slack_message = sc_bot.api_call("chat.postMessage", channel=channel, as_user=True, text=message, attachments=attachments)
     return slack_message
 
 

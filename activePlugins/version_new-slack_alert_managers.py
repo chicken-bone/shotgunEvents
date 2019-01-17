@@ -15,8 +15,8 @@ def registerCallbacks(reg):
     # Grab authentication env vars for this plugin. Install these into the env
     # if they don't already exist.
     server = os.environ["SG_SERVER"]
-    script_name = os.environ["SGDAEMON_SLACKALERTS_NAME"]
-    script_key = os.environ["SGDAEMON_SLACKALERTS_KEY"]
+    script_name = os.environ["SG_SCRIPT_NAME"]
+    script_key = os.environ["SG_SCRIPT_KEY"]
 
     # Grab an sg connection for the validator.
     sg = shotgun_api3.Shotgun(server, script_name=script_name, api_key=script_key)
@@ -69,6 +69,16 @@ def new_version_alert(sg, logger, event, args):
 
     # Make some vars for convenience.
     event_project = event.get("project")
+    event_user = event.get("user")
+
+    # Get the Coordinator group
+    coords_group = sg.find_one("Group", [["code", "is", "Coordinators"]], ["users"])["users"]
+
+    # If the event user is in the Coordinators Group, then bail. We don't
+    # want to see all the versions from ingest
+    if event_user in coords_group:
+        # if any(d.get("id", None) == event_user["id"] for d in coords_group):
+        return
 
     # Bail if we don't have the info we need.
     if not event_project:
@@ -110,25 +120,19 @@ def new_version_alert(sg, logger, event, args):
     if not event["entity"]:
         return
 
-    if event["user"]["type"] == "HumanUser":
-        slack_id = slack_shotgun_bot.get_slack_user_id(sg, event["user"]["id"])
-        if slack_id:
-            user = "<@%s>" % slack_id
-        else:
-            user = event["user"]["name"]
-        data = {
-            'site': __SG_SITE,
-            'user': user,
-            'project': "<{}/page/project_overview?project_id={}|{}>".format(__SG_SITE, proj_data.get("id"), proj_data.get("code")),
-            'version': "<{}/detail/Version/{}|{}>".format(__SG_SITE, event["entity"]["id"], event["entity"]["name"])
-        }
+    attachments = [{
+        "color": "#439FE0",
+        "title": "New Version submitted: {} / {}".format(proj_data.get("code"), event["entity"]["name"]),
+        "title_link": "{}/detail/Version/{}".format(__SG_SITE, event["entity"]["id"]),
+        "author_name": ":writing_hand: {}".format(event.get("user")["name"]),
+        "author_link": "{}/detail/HumanUser/{}".format(__SG_SITE, event.get("user")["id"]),
+    }]
 
-        for manager in managers:
-            slack_id = slack_shotgun_bot.get_slack_user_id(sg, manager["id"])
-            if slack_id:
-                message = "{user} has submitted version {project} / {version}".format(**data)
-                slack_message = slack_shotgun_bot.send_message(slack_id, message)
-                if slack_message["ok"]:
-                    logger.info("New verison alert sent to {}.".format(manager["name"]))
-                elif slack_message["error"]:
-                    logger.warning("New version alert to {} failed to send with error: {}".format(manager["name"], slack_message["error"]))
+    for manager in managers:
+        slack_id = slack_shotgun_bot.get_slack_user_id(sg, manager["id"])
+        if slack_id:
+            slack_message = slack_shotgun_bot.send_message(slack_id, None, attachments=attachments)
+            if slack_message["ok"]:
+                logger.info("New verison alert sent to {}.".format(manager["name"]))
+            elif slack_message["error"]:
+                logger.warning("New version alert to {} failed to send with error: {}".format(manager["name"], slack_message["error"]))

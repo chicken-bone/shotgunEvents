@@ -16,8 +16,8 @@ def registerCallbacks(reg):
     # Grab authentication env vars for this plugin. Install these into the env
     # if they don't already exist.
     server = os.environ["SG_SERVER"]
-    script_name = os.environ["SGDAEMON_SLACKALERTS_NAME"]
-    script_key = os.environ["SGDAEMON_SLACKALERTS_KEY"]
+    script_name = os.environ["SG_SCRIPT_NAME"]
+    script_key = os.environ["SG_SCRIPT_KEY"]
 
     args = {
         "shot_status_field": "sg_status_list",
@@ -139,14 +139,14 @@ def shot_finaled_alert(sg, logger, event, args):
         )
         return
 
-    emoji_list = [":tada:", ":+1:", ":sunglasses:", ":beer:", ":trophy:", ":fire:"]
+    emoji_list = [":tada:", ":+1:", ":sunglasses:", ":beer:", ":trophy:", ":fire:", "cat"]
 
     data = {
         'shot': "<{}/detail/Shot/{}|{}>".format(__SG_SITE, shot.get("id"), shot.get("code")),
         'emoji': random.choice(emoji_list)
     }
 
-    message = "{emoji} Shot {shot} has been finaled!".format(**data)
+    message = "{emoji} Shot *{shot}* has been finaled!".format(**data)
     slack_message = slack_shotgun_bot.send_message(project.get("sg_slack_channel_id"), message)
     if slack_message["ok"]:
         logger.info("Shot final alert sent to {}.".format(project.get("sg_slack_channel_id")))

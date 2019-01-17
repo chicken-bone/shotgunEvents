@@ -21,8 +21,8 @@ def registerCallbacks(reg):
     # filter for login events and register the callback
     eventFilter = {'Shotgun_User_Login': None}
     reg.registerCallback(
-        os.environ["SGDAEMON_RECORDLOGIN_NAME"],
-        os.environ["SGDAEMON_RECORDLOGIN_KEY"],
+        os.environ["SG_SCRIPT_NAME"],
+        os.environ["SG_SCRIPT_KEY"],
         record_login,
         eventFilter,
         None,

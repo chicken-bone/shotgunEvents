@@ -15,8 +15,8 @@ def registerCallbacks(reg):
     # Grab authentication env vars for this plugin. Install these into the env
     # if they don't already exist.
     server = os.environ["SG_SERVER"]
-    script_name = os.environ["SGDAEMON_SLACKCHANNELS_NAME"]
-    script_key = os.environ["SGDAEMON_SLACKCHANNELS_KEY"]
+    script_name = os.environ["SG_SCRIPT_NAME"]
+    script_key = os.environ["SG_SCRIPT_KEY"]
 
     # Grab an sg connection for the validator.
     sg = shotgun_api3.Shotgun(server, script_name=script_name, api_key=script_key)
@@ -33,7 +33,7 @@ def registerCallbacks(reg):
     reg.registerCallback(
         script_name,
         script_key,
-        createChannel,
+        user_to_channel,
         event_filter,
         None,
     )
@@ -59,7 +59,7 @@ def is_valid(sg, logger):
     return True
 
 
-def createChannel(sg, logger, event, args):
+def user_to_channel(sg, logger, event, args):
 
     # {'attribute_name': None,
     # 'event_type': 'Shotgun_Project_New',
