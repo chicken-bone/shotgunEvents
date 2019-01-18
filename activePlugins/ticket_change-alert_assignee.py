@@ -1,6 +1,8 @@
 import os
 import shotgun_api3
 import slack_shotgun_bot
+import HTMLParser
+parser = HTMLParser.HTMLParser()
 
 __SG_SITE = os.environ["SG_SERVER"]
 
@@ -104,9 +106,9 @@ def ticket_assignment_alert(sg, logger, event, args):
     attachments = [{
         # "pretext": "Ticket alert:",
         "color": priority_color,
-        "title": "You've been assigned Ticket #{}: {}".format(ticket_data.get("id"), ticket_data.get("title")),
+        "title": "You've been assigned Ticket #{}: {}".format(ticket_data.get("id"), parser.unescape(ticket_data.get("title"))),
         "title_link": "{}/detail/Ticket/{}".format(__SG_SITE, ticket_data.get("id")),
-        "text": ticket_data.get("description"),
+        "text": parser.unescape(ticket_data.get("description")),
         "author_name": ":writing_hand: {}".format(ticket_data.get("created_by")["name"]),
         "author_link": "{}/detail/HumanUser/{}".format(__SG_SITE, ticket_data.get("created_by")["id"]),
         "fields": [
@@ -159,3 +161,11 @@ def ticket_assignment_alert(sg, logger, event, args):
                 logger.info("New assignment alert sent to {}.".format(user["name"]))
             elif slack_message["error"]:
                 logger.warning("New assignment alert to {} failed to send with error: {}".format(user["name"], slack_message["error"]))
+
+    # slack_id = "U1FU62WKS"
+    # if slack_id:
+    #     slack_message = slack_shotgun_bot.send_message(slack_id, None, attachments=attachments)
+    #     if slack_message["ok"]:
+    #         logger.info("New assignment alert sent to {}.".format(slack_id))
+    #     elif slack_message["error"]:
+    #         logger.warning("New assignment alert to {} failed to send with error: {}".format(slack_id, slack_message["error"]))

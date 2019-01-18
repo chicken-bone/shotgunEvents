@@ -1,6 +1,8 @@
 import os
 import shotgun_api3
 import slack_shotgun_bot
+import HTMLParser
+parser = HTMLParser.HTMLParser()
 
 __SG_SITE = os.environ["SG_SERVER"]
 
@@ -106,9 +108,9 @@ def ticket_reply_alert(sg, logger, event, args):
     attachments = [{
         # "pretext": "Ticket alert:",
         "color": priority_color,
-        "title": "New reply on Ticket #{}: {}".format(ticket_data.get("id"), ticket_data.get("title")),
+        "title": "New reply on Ticket #{}: {}".format(ticket_data.get("id"), parser.unescape(ticket_data.get("title"))),
         "title_link": "{}/detail/Ticket/{}".format(__SG_SITE, ticket_data.get("id")),
-        "text": event.get("meta", {}).get("added")[0].get("name"),
+        "text": parser.unescape(event.get("meta", {}).get("added")[0].get("name")),
         "author_name": ":writing_hand: {}".format(event.get("user")["name"]),
         "author_link": "{}/detail/HumanUser/{}".format(__SG_SITE, event.get("user")["id"]),
         "fields": [
@@ -153,3 +155,11 @@ def ticket_reply_alert(sg, logger, event, args):
                 logger.info("Ticket reply alert sent to {}.".format(user["name"]))
             elif slack_message["error"]:
                 logger.warning("Ticket reply alert to {} failed to send with error: {}".format(user["name"], slack_message["error"]))
+
+    # slack_id = "U1FU62WKS"
+    # if slack_id:
+    #     slack_message = slack_shotgun_bot.send_message(slack_id, None, attachments=attachments)
+    #     if slack_message["ok"]:
+    #         logger.info("Ticket reply alert sent to {}.".format(slack_id))
+    #     elif slack_message["error"]:
+    #         logger.warning("Ticket reply alert to {} failed to send with error: {}".format(slack_id, slack_message["error"]))
