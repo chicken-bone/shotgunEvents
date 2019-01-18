@@ -108,9 +108,9 @@ def new_version_alert(sg, logger, event, args):
     if proj_data.get("sg_producer"):
         for producer in proj_data.get("sg_producer"):
             managers.append(producer)
-    if proj_data.get("sg_coordinator"):
-        for coord in proj_data.get("sg_coordinator"):
-            managers.append(coord)
+    # if proj_data.get("sg_coordinator"):
+    #     for coord in proj_data.get("sg_coordinator"):
+    #         managers.append(coord)
 
     # if theres no one to notify, then bail
     if not managers:
