@@ -139,7 +139,7 @@ def shot_finaled_alert(sg, logger, event, args):
         )
         return
 
-    emoji_list = [":tada:", ":+1:", ":sunglasses:", ":beer:", ":trophy:", ":fire:", ":cat:"]
+    emoji_list = [":tada:", ":+1:", ":sunglasses:", ":beer:", ":trophy:", ":fire:", ":cat:", ":dog:"]
 
     data = {
         'shot': "<{}/detail/Shot/{}|{}>".format(__SG_SITE, shot.get("id"), shot.get("code")),
