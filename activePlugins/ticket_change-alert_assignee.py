@@ -8,7 +8,7 @@ def parseHtml(text):
     if not text:
         None
     else:
-        parser(text)
+        parser.unescape(text)
 
 __SG_SITE = os.environ["SG_SERVER"]
 
