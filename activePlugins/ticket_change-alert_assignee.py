@@ -4,7 +4,7 @@ import slack_shotgun_bot
 import HTMLParser
 parser = HTMLParser.HTMLParser()
 
-parseHtml(text):
+def parseHtml(text):
     if text not None:
         parser(text)
     else:
