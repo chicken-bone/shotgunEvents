@@ -5,10 +5,10 @@ import HTMLParser
 parser = HTMLParser.HTMLParser()
 
 def parseHtml(text):
-    if text not None:
-        parser(text)
-    else:
+    if not text:
         None
+    else:
+        parser(text)
 
 __SG_SITE = os.environ["SG_SERVER"]
 
