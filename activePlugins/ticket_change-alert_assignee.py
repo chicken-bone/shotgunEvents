@@ -4,6 +4,12 @@ import slack_shotgun_bot
 import HTMLParser
 parser = HTMLParser.HTMLParser()
 
+def parseHtml(text):
+    if not text:
+        None
+    else:
+        parser.unescape(text)
+
 __SG_SITE = os.environ["SG_SERVER"]
 
 
@@ -106,9 +112,9 @@ def ticket_assignment_alert(sg, logger, event, args):
     attachments = [{
         # "pretext": "Ticket alert:",
         "color": priority_color,
-        "title": "You've been assigned Ticket #{}: {}".format(ticket_data.get("id"), parser.unescape(ticket_data.get("title"))),
+        "title": "You've been assigned Ticket #{}: {}".format(ticket_data.get("id"), parseHtml(ticket_data.get("title"))),
         "title_link": "{}/detail/Ticket/{}".format(__SG_SITE, ticket_data.get("id")),
-        "text": parser.unescape(ticket_data.get("description")),
+        "text": parseHtml(ticket_data.get("description")),
         "author_name": ":writing_hand: {}".format(ticket_data.get("created_by")["name"]),
         "author_link": "{}/detail/HumanUser/{}".format(__SG_SITE, ticket_data.get("created_by")["id"]),
         "fields": [
