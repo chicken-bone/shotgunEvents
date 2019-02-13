@@ -1,8 +1,7 @@
 import os
 import shotgun_api3
 import slack_shotgun_bot
-import HTMLParser
-parser = HTMLParser.HTMLParser()
+from parse_html import parseHtml
 
 __SG_SITE = os.environ["SG_SERVER"]
 
@@ -108,9 +107,9 @@ def ticket_reply_alert(sg, logger, event, args):
     attachments = [{
         # "pretext": "Ticket alert:",
         "color": priority_color,
-        "title": "New reply on Ticket #{}: {}".format(ticket_data.get("id"), parser.unescape(ticket_data.get("title"))),
+        "title": "New reply on Ticket #{}: {}".format(ticket_data.get("id"), parseHtml(ticket_data.get("title"))),
         "title_link": "{}/detail/Ticket/{}".format(__SG_SITE, ticket_data.get("id")),
-        "text": parser.unescape(event.get("meta", {}).get("added")[0].get("name")),
+        "text": parseHtml(event.get("meta", {}).get("added")[0].get("name")),
         "author_name": ":writing_hand: {}".format(event.get("user")["name"]),
         "author_link": "{}/detail/HumanUser/{}".format(__SG_SITE, event.get("user")["id"]),
         "fields": [

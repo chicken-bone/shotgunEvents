@@ -1,14 +1,7 @@
 import os
 import shotgun_api3
 import slack_shotgun_bot
-import HTMLParser
-parser = HTMLParser.HTMLParser()
-
-def parseHtml(text):
-    if not text:
-        None
-    else:
-        parser.unescape(text)
+from parse_html import parseHtml
 
 __SG_SITE = os.environ["SG_SERVER"]
 

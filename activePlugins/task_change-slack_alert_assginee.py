@@ -70,9 +70,19 @@ def task_assignment_alert(sg, logger, event, args):
     # gather some info
     event_project = event.get("project")
     task_assignees = event.get("meta", {}).get("added")
+    event_user = event.get("user")
 
     # Bail if we don't have the info we need.
     if not event_project or not task_assignees:
+        return
+
+    # Get the Coordinator group
+    coords_group = sg.find_one("Group", [["code", "is", "Coordinators"]], ["users"])["users"]
+
+    # If the event user is in the Coordinators Group, then bail. We don't
+    # want to see all the versions from ingest assignments
+    if event_user in coords_group:
+        # if any(d.get("id", None) == event_user["id"] for d in coords_group):
         return
 
     # query some project data
