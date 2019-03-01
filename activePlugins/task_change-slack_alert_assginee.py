@@ -115,7 +115,7 @@ def task_assignment_alert(sg, logger, event, args):
             message = "You've been assigned {project} / {task}".format(**data)
 
             if task_link:
-                data['task_link'] = "<{}/detail/{}/{}|{}>".format(__SG_SITE, task_link["type"], task_link["id"], task_link["name"])
+                data['task_link'] = "<{}/detail/{}/{}|{}>".format(__SG_SITE, task_link.get("type"), task_link.get("id"), task_link.get("name"))
                 message = "You've been assigned {project} / {task_link} / {task}".format(**data)
 
             slack_message = slack_shotgun_bot.send_message(slack_id, message)
